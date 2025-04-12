@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase'
 import { toast, Toaster } from 'sonner'
 import { Mail, Phone } from 'lucide-react'
 
@@ -20,24 +19,8 @@ export default function ContactForm() {
     setIsSubmitting(true)
 
     try {
-      // Save to database
-      const { error: dbError } = await supabase
-        .from('contact_form_messages')
-        .insert([{
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          message: formData.message,
-          status: 'new',
-          created_at: new Date().toISOString()
-        }])
-
-      if (dbError) {
-        throw dbError
-      }
-
-      // Send email notification
-      const emailResponse = await fetch('/api/send-email', {
+      // Send to Netlify Function
+      const response = await fetch('/.netlify/functions/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,16 +28,16 @@ export default function ContactForm() {
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
-          message: formData.message
+          message: `${formData.message}\nPhone: ${formData.phone}`
         }),
       })
 
-      if (!emailResponse.ok) {
-        console.error('Failed to send email notification')
+      if (!response.ok) {
+        throw new Error('Failed to send message')
       }
 
       toast.success('Message sent successfully!', {
-        duration: 1750, // 1.75 seconds
+        duration: 1750,
       })
       setFormData({ name: '', email: '', phone: '', message: '' })
     } catch (error: any) {
