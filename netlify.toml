@@ -15,4 +15,12 @@
   status = 200
 
 [context.production.environment]
-  NEXT_PUBLIC_BACKEND_URL = "https://api.ayhro.pro" 
+  NEXT_PUBLIC_BACKEND_URL = "https://api.ayhro.pro"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin" 
